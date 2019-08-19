@@ -89,7 +89,7 @@ class SchemeNode(SchemeBaseNode):
 
     def _set_identity(self, identity):
         ''' Set identity '''
-        super()._set_identity(identity)
+        super(SchemeNode, self)._set_identity(identity)
         id_field = self._int_get('identity', None)
         if id_field and identity is not None:
             id_field.set(identity)

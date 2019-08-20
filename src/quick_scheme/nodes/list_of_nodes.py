@@ -14,13 +14,12 @@ class ListOfNodesNode(SchemeBaseNode):
     def _set_data(self, data):
         ''' Set data for this object '''
         item_list = []
-        if not isinstance(data, list):
-            data = [data]
-        for idx, item in enumerate(data):
-            # print("Adding item#%s (%s) to the list" % (idx, item))
-            child = self._create_child(self.TYPE, identity=idx, value=item)
-            item_list.append(child)
-        #print("Adding %s" % item_list)
+        if data:
+            if not isinstance(data, list):
+                data = [data]
+            for idx, item in enumerate(data):
+                child = self._create_child(self.TYPE, identity=idx, value=item)
+                item_list.append(child)
         self._data = item_list
 
     def _get_data(self):

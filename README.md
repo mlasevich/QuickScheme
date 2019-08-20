@@ -8,6 +8,8 @@
 | :---: |
 
 ## QuickScheme Release Notes
+* 0.1.1
+    * Add Validators
 * 0.1.0
     * Initial version
 
@@ -154,8 +156,8 @@ Now to put it all together, we create a root Object that represents the document
             Field('projects', ftype=KeyBasedList(Project))
         ]
 
-    PRESERVE_ORDER = True
-    ALLOW_UNDEFINED = True
+        PRESERVE_ORDER = True
+        ALLOW_UNDEFINED = True
 
 Here we have the same thing describing the root document:
 

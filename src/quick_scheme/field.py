@@ -17,7 +17,11 @@ FIELD_DEFAULTS = dict(identity=False,
 
 
 class FieldValue(object):
-    ''' Field Value Holder '''
+    '''
+    Field Value Holder
+
+    This object holds a specific value for a specific node
+    '''
 
     def __init__(self, field, node):
         '''
@@ -93,6 +97,8 @@ class FieldValue(object):
 
 class Field(object):
     ''' Basic Field '''
+
+    # Python version independent version of a string
     STR = STR
 
     def __init__(self, name, **kwargs):
@@ -121,12 +127,15 @@ class Field(object):
 
     @property
     def is_qs_node(self):
-        ''' Return true, if ftype is a QuickScheme node(derivative of SchemeBaseNode)'''
+        ''' 
+        Returns true, if type for this field is a QuickScheme Node (i.e. a child of SchemeBaseNode)
+         '''
         return issubclass(self.ftype, SchemeBaseNode)
 
     @property
     def has_default(self):
-        ''' Has default value '''
+        ''' 
+        Returns True if this field has a default value '''
         default = self._data.get('default', None)
         return default is not None
 

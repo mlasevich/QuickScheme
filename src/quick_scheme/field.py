@@ -65,7 +65,7 @@ class FieldValue(object):
         value = self.get()
         if isinstance(value, SchemeBaseNode):
             data = value.quick_scheme.get_data()
-            #ident = value.quick_scheme.get_identity()
+            # ident = value.quick_scheme.get_identity()
             # print("** Data for %s - %s is %s (%s)" %
             #      (ident if ident is not None else '*', self.name(), data, type(data)))
 
@@ -87,10 +87,12 @@ class FieldValue(object):
     def is_valid(self):
         ''' Check if this field value is valid '''
         if self.node:
-            if self.field.required and not self.is_set:
-                LOG.debug("Field '%s' in '%s' is required but not set",
-                          self.name(), self.node._path_str())
-                return False
+            if not self.is_set:
+                if self.field.required:
+                    LOG.debug("Field '%s' in '%s' is required but not set",
+                              self.name(), self.node._path_str())
+                    return False
+                return True
             return self.field.validate(self)
         return True
 
@@ -127,14 +129,14 @@ class Field(object):
 
     @property
     def is_qs_node(self):
-        ''' 
+        '''
         Returns true, if type for this field is a QuickScheme Node (i.e. a child of SchemeBaseNode)
          '''
         return issubclass(self.ftype, SchemeBaseNode)
 
     @property
     def has_default(self):
-        ''' 
+        '''
         Returns True if this field has a default value '''
         default = self._data.get('default', None)
         return default is not None

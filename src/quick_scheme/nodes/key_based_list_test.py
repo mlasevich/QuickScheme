@@ -6,7 +6,7 @@ import unittest
 
 from quick_scheme.field import Field
 from .key_based_list import KeyBasedList, KeyBasedListInst, KeyBasedListNode
-from .node import SchemeNode
+from quick_scheme.nodes.scheme_node import SchemeNode
 
 
 def clean_dict(data):

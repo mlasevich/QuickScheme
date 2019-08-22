@@ -2,6 +2,7 @@
 Base Node Types
 
 '''
+from email.policy import default
 import logging
 
 from quick_scheme.field import FieldValue
@@ -9,6 +10,7 @@ from quick_scheme.field import FieldValue
 from ..base_node import SchemeBaseNode
 from ..exceptions import QuickSchemeValidationException
 from ..qs_yaml import UnsortableOrderedDict
+from ..utils import Args
 
 
 LOG = logging.getLogger(__name__)
@@ -16,7 +18,6 @@ LOG = logging.getLogger(__name__)
 
 class SchemeNode(SchemeBaseNode):
     ''' Basic Node - a dictionary with defined Fields '''
-
     # List of fields
     FIELDS = []
     # Allow undefined fields. if false, throw exception on undefined field
@@ -110,27 +111,56 @@ class SchemeNode(SchemeBaseNode):
         ''' Get fields '''
         return self._int_get('fields', {})
 
+    def _run_if_present(self, name, default_value=None, args=None):
+        ''' Run method if present '''
+        if args is None:
+            args = Args()
+        if hasattr(self, name):
+            LOG.warning("Found method %s", name)
+            return args.run(getattr(self, name), default)
+        return default_value
+
+    def _set_field_data(self, field, value, extra_data):
+        ''' Internal part of set field data '''
+        indexed_value_holder = self._fields.get(field, None)
+        if indexed_value_holder is not None:
+            _, value_holder = indexed_value_holder
+            value_holder.set(value, parent=self, identity=field)
+            field_exists = True
+        else:
+            field_exists = False
+            if self.ALLOW_UNDEFINED:
+                LOG.warning("M3: adding extra field %s", field)
+                extra_data[field] = value
+            else:
+                raise QuickSchemeValidationException("Invalid field '%s' for '%s'" % (field,
+                                                                                      self._name))
+        return field_exists
+
+    def _init_field(self, field, value, extra_data):
+        ''' Set data for one field. This is the outer call that calls hooks '''
+        args = Args(value, field=field, extra_data=extra_data)
+        value = self._run_if_present('_before_set_%s' % field, value, args)
+        field_exists = False
+        if not self._run_if_present('_do_set_%s' % field, False, args):
+            field_exists = self._set_field_data(field, value, extra_data)
+        return self._run_if_present('_after_set_%s' % field, field_exists, args)
+
     def _set_data(self, data):
         ''' Set data for this object '''
         extra_data = self._get_map_class_instance()
 
-        fields = self._fields
+        keys_set = []
         if isinstance(data, dict):
-            for key, value in data.items():
-                indexed_value_holder = fields.get(key, None)
-                if indexed_value_holder is not None:
-                    _, value_holder = indexed_value_holder
-                    value_holder.set(value, parent=self, identity=key)
-                else:
-                    if self.ALLOW_UNDEFINED:
-                        extra_data[key] = value
-                    else:
-                        raise QuickSchemeValidationException(
-                            "Invalid field '%s' for '%s'" % (key, self._name))
+            for field, value in data.items():
+                keys_set.append(object)
+                self._init_field(field, value, extra_data)
         else:
-            # print("Invalid data type: %s for %s (%s)" %
-            #      (type(data), self.quick_scheme.path_str(), data))
             self._brief_set(data)
+
+        LOG.error("%s fields not set, %s extra fields when setting %s from %s",
+                  len(keys_set), len(extra_data), self._path_str(), data)
+
         self._data = extra_data
 
     def _get_by_id(self, id):

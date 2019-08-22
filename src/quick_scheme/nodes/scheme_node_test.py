@@ -3,9 +3,10 @@
 import logging
 import unittest
 
-from ..exceptions import QuickSchemeValidationException
 from quick_scheme.field import Field
-from .node import SchemeNode
+from quick_scheme.nodes.scheme_node import SchemeNode
+
+from ..exceptions import QuickSchemeValidationException
 
 
 class MyEmptyNode(SchemeNode):
@@ -38,6 +39,22 @@ class MyOpenNode(MyClosedNode):
         Field('integer_with_default_1', ftype=int, default=1),
         Field('integer_with_default_2', ftype=int, default=2, always=False),
     ]
+
+    def _before_set_b4(self, value, **_):
+        ''' Runs Before b4 is set '''
+        value = "__" + value + "__"
+        return value
+
+    def _after_set_after(self, value, field, extra_data):
+        ''' Runs After 'after' is set '''
+        extra_data['after_%s' % field] = value
+        return True
+
+    def _do_set_override(self, value, field, extra_data):
+        ''' Runs instead setting 'override' '''
+        print("Overriding!")
+        extra_data['instead'] = {field: value}
+        return True
 
 
 class TestSchemeNode(unittest.TestCase):
@@ -129,6 +146,43 @@ class TestSchemeNode(unittest.TestCase):
                                                             'name': 'def',
                                                             'integer_no_default': 5,
                                                             'integer_with_default_1': 1})
+
+    def test_open_node_data_hooks_b4(self):
+        ''' Test before_set hook'''
+        node = MyOpenNode(
+            None, data={'id': 'value', 'integer_no_default': 5, 'b4': 'my_before'})
+        self.assertEqual(len(node.quick_scheme.fields),
+                         len(MyClosedNode.FIELDS))
+        self.assertDictEqual(node.quick_scheme.get_data(), {'id': 'value',
+                                                            'name': 'def',
+                                                            'integer_no_default': 5,
+                                                            'integer_with_default_1': 1,
+                                                            'b4': '__my_before__'})
+
+    def test_open_node_data_hooks_after(self):
+        ''' Test after_set hook'''
+        node = MyOpenNode(
+            None, data={'id': 'value', 'integer_no_default': 5, 'after': 'my_after'})
+        self.assertEqual(len(node.quick_scheme.fields),
+                         len(MyClosedNode.FIELDS))
+        self.assertDictEqual(node.quick_scheme.get_data(), {'id': 'value',
+                                                            'name': 'def',
+                                                            'integer_no_default': 5,
+                                                            'integer_with_default_1': 1,
+                                                            'after': 'my_after',
+                                                            'after_after': 'my_after'})
+
+    def test_open_node_data_hooks_instead(self):
+        ''' Test 'on-set' hook '''
+        node = MyOpenNode(
+            None, data={'id': 'value', 'integer_no_default': 5, 'override': 'my_instead'})
+        self.assertEqual(len(node.quick_scheme.fields),
+                         len(MyClosedNode.FIELDS))
+        self.assertDictEqual(node.quick_scheme.get_data(), {'id': 'value',
+                                                            'name': 'def',
+                                                            'integer_no_default': 5,
+                                                            'integer_with_default_1': 1,
+                                                            'instead': {'override': 'my_instead'}})
 
     def test_open_node_extra_data(self):
         ''' Test getting action_desc'''

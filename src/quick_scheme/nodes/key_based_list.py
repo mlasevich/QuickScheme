@@ -2,7 +2,7 @@
 
 from ..base_node import SchemeBaseNode
 from quick_scheme.field import FieldValue
-from .node import SchemeNode
+from quick_scheme.nodes.scheme_node import SchemeNode
 
 
 class KeyBasedListNode(SchemeNode):

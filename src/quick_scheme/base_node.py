@@ -46,7 +46,7 @@ class SchemeBaseNode(object):
         self._data = None
         self.quick_scheme = ProxyAccess(self)
         self._set_identity(identity)
-        self._set_data(data)
+        self._from_data(data)
         self._is_valid = self._validate(True)
 
     def _root(self):
@@ -125,6 +125,14 @@ class SchemeBaseNode(object):
 
     def _initialize(self, *args, **kwargs):
         ''' Initialization hook for object - called before the data is set'''
+
+    def _from_data(self, data):
+        ''' Set this parameter from data '''
+        self._set_data(data)
+        self._inflate()
+
+    def _inflate(self):
+        ''' Post Load Inflate Hook '''
 
     def _set_data(self, data):
         ''' Set data for this object '''

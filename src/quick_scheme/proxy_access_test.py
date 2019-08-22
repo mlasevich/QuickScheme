@@ -4,7 +4,7 @@ import logging
 import unittest
 
 from .base_node import ProxyAccess
-from .nodes.node import SchemeNode
+from quick_scheme.nodes.scheme_node import SchemeNode
 
 
 class MyEmptyNode(SchemeNode):

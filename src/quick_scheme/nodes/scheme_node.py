@@ -2,7 +2,6 @@
 Base Node Types
 
 '''
-from email.policy import default
 import logging
 
 from quick_scheme.field import FieldValue
@@ -117,7 +116,7 @@ class SchemeNode(SchemeBaseNode):
             args = Args()
         if hasattr(self, name):
             LOG.warning("Found method %s", name)
-            return args.run(getattr(self, name), default)
+            return args.run(getattr(self, name), default_value)
         return default_value
 
     def _set_field_data(self, field, value, extra_data):

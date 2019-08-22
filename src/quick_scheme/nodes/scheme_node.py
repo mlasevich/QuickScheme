@@ -150,18 +150,18 @@ class SchemeNode(SchemeBaseNode):
         ''' Set data for this object '''
         extra_data = self._get_map_class_instance()
 
-        keys_set = []
         if isinstance(data, dict):
             for field, value in data.items():
-                keys_set.append(object)
                 self._init_field(field, value, extra_data)
         else:
             self._brief_set(data)
 
-        LOG.error("%s fields not set, %s extra fields when setting %s from %s",
-                  len(keys_set), len(extra_data), self._path_str(), data)
-
         self._data = extra_data
+
+        args = Args(data=data)
+        for field_name, (_field_idx, field) in self._fields.items():
+            if not field.is_set:
+                self._run_if_present("_on_not_set_%s" % field_name, args=args)
 
     def _get_by_id(self, id):
         ''' Return by id '''

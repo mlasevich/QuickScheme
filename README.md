@@ -8,6 +8,8 @@
 | :---: |
 
 ## QuickScheme Release Notes
+* 0.2.1
+    * Add field not set hooks
 * 0.2.0
     * Add before/instead/after field set hooks
 * 0.1.1

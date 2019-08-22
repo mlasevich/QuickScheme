@@ -40,6 +40,10 @@ class MyOpenNode(MyClosedNode):
         Field('integer_with_default_2', ftype=int, default=2, always=False),
     ]
 
+    def _on_not_set_integer_no_default(self, data, **kwargs):
+        ''' Runs if integer_no_default is not '''
+        self._data['integer_no_default_unset'] = 'unset'
+
     def _before_set_b4(self, value, **_):
         ''' Runs Before b4 is set '''
         value = "__" + value + "__"
@@ -135,7 +139,8 @@ class TestSchemeNode(unittest.TestCase):
         self.assertDictEqual(node.quick_scheme.get_data(), {'id': '',
                                                             'name': 'def',
                                                             'integer_no_default': 0,
-                                                            'integer_with_default_1': 1})
+                                                            'integer_with_default_1': 1,
+                                                            'integer_no_default_unset': 'unset'})
 
     def test_open_node_data(self):
         ''' Test getting action_desc'''
@@ -205,7 +210,8 @@ class TestSchemeNode(unittest.TestCase):
         self.assertDictEqual(node.quick_scheme.get_data(), {'id': '',
                                                             'name': 'my brief value',
                                                             'integer_no_default': 0,
-                                                            'integer_with_default_1': 1})
+                                                            'integer_with_default_1': 1,
+                                                            'integer_no_default_unset': 'unset'})
 
 
 if __name__ == '__main__':
